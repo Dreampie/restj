@@ -17,11 +17,11 @@
 package cn.dreampie.interceptor;
 
 
-import cn.dreampie.route.ActionInvocation;
+import cn.dreampie.route.RouterInvocation;
 
 /**
  * Interceptor.
  */
 public interface Interceptor {
-  void intercept(ActionInvocation ai);
+  void intercept(RouterInvocation ai);
 }

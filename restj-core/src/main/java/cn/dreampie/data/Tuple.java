@@ -5,8 +5,8 @@ package cn.dreampie.data;
  */
 public class Tuple {
 
-  public static Tuple v(Object... args) {
-    return new Tuple(args);
+  public static Tuple out(Object... v) {
+    return new Tuple(v);
   }
 
   private Object[] items;
@@ -23,7 +23,7 @@ public class Tuple {
   }
 
   public static void main(String[] args) {
-    Tuple t = Tuple.v("Unmi", "fantasia@sina.come");
+    Tuple t = Tuple.out("Unmi", "fantasia@sina.come");
     System.out.println(t._(0)); //输出 Unmi
   }
 }

@@ -24,10 +24,10 @@ import cn.dreampie.plugin.IPlugin;
 
 import java.util.List;
 
-class ConfigLoader {
+public class ConfigLoader {
 
   private static final Constants constants = new Constants();
-  private static final Routes routes = new Routes();
+  private static final Controllers CONTROLLERS = new Controllers();
   private static final Plugins plugins = new Plugins();
   private static final Interceptors interceptors = new Interceptors();
   private static final Handlers handlers = new Handlers();
@@ -42,7 +42,7 @@ class ConfigLoader {
    */
   static void config(Config config) {
     config.configConstant(constants);
-    config.configRoute(routes);
+    config.configController(CONTROLLERS);
     config.configPlugin(plugins);
     startPlugins();  // very important!!!
     config.configInterceptor(interceptors);
@@ -53,8 +53,8 @@ class ConfigLoader {
     return constants;
   }
 
-  public static Routes getRoutes() {
-    return routes;
+  public static Controllers getControllers() {
+    return CONTROLLERS;
   }
 
   public static Plugins getPlugins() {

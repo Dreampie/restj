@@ -1,8 +1,8 @@
 package cn.dreampie.exception;
 
 import cn.dreampie.http.HttpStatus;
-import cn.dreampie.http.RestjRequest;
-import cn.dreampie.http.RestjResponse;
+import cn.dreampie.http.Request;
+import cn.dreampie.http.Response;
 import cn.dreampie.log.Logger;
 import cn.dreampie.log.LoggerFactory;
 
@@ -69,18 +69,18 @@ public class WebException extends RuntimeException {
    * Note that the implementation is also responsible for logging the exception.
    *
    *
-   * @param restjRequest
-   * @param restjResponse the response to write to
+   * @param request
+   * @param response the response to write to
    * @throws java.io.IOException in case of IO error.
    */
-  public void writeTo(RestjRequest restjRequest, RestjResponse restjResponse) throws IOException {
+  public void writeTo(Request request, Response response) throws IOException {
     // by default log stack trace at debug level only
     if (logger.isDebugEnabled()) {
-      logger.debug("request raised WebException - " + restjRequest, this);
+      logger.debug("request raised WebException - " + request, this);
     }
 
-    restjResponse.setStatus(getStatus());
-    restjResponse.setContentType(getContentType());
-    restjResponse.getWriter().print(getContent());
+    response.setStatus(getStatus());
+    response.setContentType(getContentType());
+    response.getWriter().print(getContent());
   }
 }

@@ -16,6 +16,9 @@
 
 package cn.dreampie.handler;
 
+import cn.dreampie.http.Request;
+import cn.dreampie.http.Response;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -37,7 +40,7 @@ public abstract class Handler {
 	 * @param isHandled JFinalFilter will invoke doFilter() method if isHandled[0] == false,
 	 * 			it is usually to tell Filter should handle the static resource.
 	 */
-	public abstract void handle(String target, HttpServletRequest request, HttpServletResponse response, boolean[] isHandled);
+	public abstract void handle(String target, Request request, Response response, boolean[] isHandled);
 }
 
 

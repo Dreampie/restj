@@ -19,7 +19,7 @@ package cn.dreampie.config;
 /**
  * Config.
  * <p/>
- * Config order: configConstant(), configRoute(), configPlugin(), configInterceptor(), configHandler()
+ * Config order: configConstant(), configController(), configPlugin(), configInterceptor(), configHandler()
  */
 public abstract class Config {
 
@@ -31,7 +31,7 @@ public abstract class Config {
   /**
    * Config route
    */
-  public abstract void configRoute(Routes routes);
+  public abstract void configController(Controllers controllers);
 
   /**
    * Config plugin

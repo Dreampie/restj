@@ -16,17 +16,8 @@
 
 package cn.dreampie.route;
 
-import cn.dreampie.http.RestjRequest;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.text.ParseException;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.Map.Entry;
+import cn.dreampie.http.Request;
+import cn.dreampie.http.Response;
 
 /**
  * Controller
@@ -36,8 +27,6 @@ import java.util.Map.Entry;
  * 众里寻她千百度，蓦然回首，那人却在灯火阑珊处。
  */
 public abstract class Controller {
-
-  private RestjRequest restjRequest;
 
 }
 
