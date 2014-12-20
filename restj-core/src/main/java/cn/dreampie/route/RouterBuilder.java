@@ -90,13 +90,13 @@ public final class RouterBuilder {
         }
 
         head = method.getAnnotation(HEAD.class);
-        if (put != null) {
+        if (head != null) {
           matchBuilder.add(new RouterMatch(controllerClazz, HttpMethod.HEAD, head.value(), method));
           continue;
         }
 
         patch = method.getAnnotation(PATCH.class);
-        if (put != null) {
+        if (patch != null) {
           matchBuilder.add(new RouterMatch(controllerClazz, HttpMethod.PATCH, patch.value(), method));
           continue;
         }
