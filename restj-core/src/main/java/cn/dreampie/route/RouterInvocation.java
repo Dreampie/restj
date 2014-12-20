@@ -86,7 +86,7 @@ public class RouterInvocation {
           }
           i++;
         }
-
+        routerMatch.getMethod().setAccessible(true);
         return routerMatch.getMethod().invoke(controller, args);
       } catch (InvocationTargetException e) {
         Throwable cause = e.getTargetException();

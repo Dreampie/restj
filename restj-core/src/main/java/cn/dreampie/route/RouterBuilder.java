@@ -16,10 +16,7 @@
 
 package cn.dreampie.route;
 
-import cn.dreampie.annotation.http.DELETE;
-import cn.dreampie.annotation.http.GET;
-import cn.dreampie.annotation.http.POST;
-import cn.dreampie.annotation.http.PUT;
+import cn.dreampie.annotation.http.*;
 import cn.dreampie.config.Controllers;
 import cn.dreampie.config.Interceptors;
 import cn.dreampie.http.HttpMethod;
@@ -61,6 +58,8 @@ public final class RouterBuilder {
     GET get = null;
     POST post = null;
     PUT put = null;
+    HEAD head = null;
+    PATCH patch = null;
     //addResources
     for (Class<? extends Controller> controllerClazz : controllers.getControllers()) {
 
@@ -87,6 +86,18 @@ public final class RouterBuilder {
         put = method.getAnnotation(PUT.class);
         if (put != null) {
           matchBuilder.add(new RouterMatch(controllerClazz, HttpMethod.PUT, put.value(), method));
+          continue;
+        }
+
+        head = method.getAnnotation(HEAD.class);
+        if (put != null) {
+          matchBuilder.add(new RouterMatch(controllerClazz, HttpMethod.HEAD, head.value(), method));
+          continue;
+        }
+
+        patch = method.getAnnotation(PATCH.class);
+        if (put != null) {
+          matchBuilder.add(new RouterMatch(controllerClazz, HttpMethod.PATCH, patch.value(), method));
           continue;
         }
       }

@@ -21,7 +21,7 @@ package cn.dreampie.http;
  * @author Eduardo Yáñez
  */
 public enum HttpMethod {
-  GET("GET"), POST("POST"), PUT("PUT"), DELETE("DELETE");
+  GET("GET"), POST("POST"), PUT("PUT"), DELETE("DELETE"),HEAD("HEAD"),PATCH("PATCH");
   private final String value;
 
   private HttpMethod(String value) {
