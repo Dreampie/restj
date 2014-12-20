@@ -65,7 +65,7 @@ public class RouteMatch {
 
 
   public String toString() {
-    return "StdRestxHandlerMatch{" +
+    return "StdRestjHandlerMatch{" +
         "pattern='" + pattern + '\'' +
         ", path='" + path + '\'' +
         ", pathParams=" + pathParams +

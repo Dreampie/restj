@@ -11,7 +11,7 @@ import java.io.IOException;
 /**
  * Created by ice on 14-12-19.
  /**
- * A WebException can be raised to make restx return immediately an HTTP response with a specific HTTP status.
+ * A WebException can be raised to make restj return immediately an HTTP response with a specific HTTP status.
  */
 public class WebException extends RuntimeException {
   private final static Logger logger = LoggerFactory.getLogger(WebException.class);
@@ -62,7 +62,7 @@ public class WebException extends RuntimeException {
   }
 
   /**
-   * Writes this web exception in a RestxResponse.
+   * Writes this web exception in a RestjResponse.
    *
    * This implementation uses the status, contentType and content found on the exception.
    * Override it to provide custom response.

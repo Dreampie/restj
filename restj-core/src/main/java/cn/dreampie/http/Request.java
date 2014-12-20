@@ -50,24 +50,24 @@ public interface Request {
   String getBaseNetworkPath();
 
   /**
-   * Returns the restx portion of the request path.
+   * Returns the restj portion of the request path.
    * <p>
    * If incoming request is http://mydomain.com/api/myresource/test?q=test and baseUri is http://mydomain.com/api,
-   * then restx path will be /myresource/test
+   * then restj path will be /myresource/test
    * </p>
    *
-   * @return the restx portion of the request path.
+   * @return the restj portion of the request path.
    */
   String getRestPath();
 
   /**
-   * Returns the restx portion of the full request uri.
+   * Returns the restj portion of the full request uri.
    * <p>
    * If incoming request is http://mydomain.com/api/myresource/test?q=test and baseUri is http://mydomain.com/api,
-   * then restx uri will be /myresource/test?q=test
+   * then restj uri will be /myresource/test?q=test
    * </p>
    *
-   * @return the restx portion of the full request uri.
+   * @return the restj portion of the full request uri.
    */
   String getRestUri();
 
@@ -128,7 +128,7 @@ public interface Request {
    * has been used to provide access to request content for logs and error processing.
    * </p>
    * <p>
-   * Restx framework will always call this method at the end of request processing.
+   * Restj framework will always call this method at the end of request processing.
    * </p>
    *
    * @throws java.io.IOException
