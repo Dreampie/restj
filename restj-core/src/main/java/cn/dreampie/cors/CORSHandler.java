@@ -7,13 +7,8 @@ import cn.dreampie.http.Request;
 import cn.dreampie.http.Response;
 import cn.dreampie.log.Logger;
 import cn.dreampie.log.LoggerFactory;
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-
-import java.util.Collection;
-import java.util.HashSet;
 
 /**
  * Created by ice on 14-12-22.

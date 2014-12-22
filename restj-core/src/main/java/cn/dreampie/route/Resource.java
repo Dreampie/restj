@@ -1,12 +1,8 @@
 package cn.dreampie.route;
 
-import cn.dreampie.http.Request;
-import cn.dreampie.http.Response;
 import cn.dreampie.route.match.RouteMatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-
-import java.util.Objects;
 
 /**
  * Controller

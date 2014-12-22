@@ -37,7 +37,7 @@ package cn.dreampie.reflect;
 
 /**
  * A unchecked wrapper for any of Java's checked reflection exceptions:
- * <p>
+ * <p/>
  * These exceptions are
  * <ul>
  * <li> {@link ClassNotFoundException}</li>
@@ -54,19 +54,19 @@ package cn.dreampie.reflect;
  */
 public class ReflectException extends RuntimeException {
 
-    public ReflectException(String message) {
-        super(message);
-    }
+  public ReflectException(String message) {
+    super(message);
+  }
 
-    public ReflectException(String message, Throwable cause) {
-        super(message, cause);
-    }
+  public ReflectException(String message, Throwable cause) {
+    super(message, cause);
+  }
 
-    public ReflectException() {
-        super();
-    }
+  public ReflectException() {
+    super();
+  }
 
-    public ReflectException(Throwable cause) {
-        super(cause);
-    }
+  public ReflectException(Throwable cause) {
+    super(cause);
+  }
 }

@@ -2,8 +2,8 @@ package cn.dreampie.route;
 
 import cn.dreampie.annotation.Resource;
 import cn.dreampie.annotation.http.*;
-import cn.dreampie.config.Resources;
 import cn.dreampie.config.Interceptors;
+import cn.dreampie.config.Resources;
 import cn.dreampie.http.HttpMethod;
 import cn.dreampie.interceptor.Interceptor;
 import cn.dreampie.interceptor.InterceptorBuilder;

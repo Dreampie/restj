@@ -22,7 +22,6 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation used to mark a resource method that responds to HTTP GET requests.
- *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
