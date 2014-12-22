@@ -88,10 +88,10 @@ public class CORSHandler extends Handler {
       if (HttpMethod.OPTIONS.equals(request.getHttpMethod())) {
         response.setStatus(HttpStatus.OK);
       } else {
-        ctx.nextHandlerMatch().handle(req, resp, ctx);
+//        ctx.nextHandlerMatch().handle(req, resp, ctx);
       }
     } else {
-      ctx.nextHandlerMatch().handle(req, resp, ctx);
+//      ctx.nextHandlerMatch().handle(req, resp, ctx);
     }
   }
 }
