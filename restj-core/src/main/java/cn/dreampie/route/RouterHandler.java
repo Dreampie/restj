@@ -56,6 +56,7 @@ public final class RouterHandler extends Handler {
   public final void handle(String target, Request request, Response response, boolean[] isHandled) {
     Optional<? extends RouteMatch> routeMatch = Optional.absent();
     RouterMatch routerMatch = null;
+    isHandled[0] = true;
 
     for (RouterMatch matcher : routerBuilder.getRouterMatches()) {
       routeMatch = matcher.match(request);
@@ -91,13 +92,17 @@ public final class RouterHandler extends Handler {
 
   private void write(Response response, String content) {
 
-    PrintWriter out = null;
+    PrintWriter writer = null;
     try {
-      out = response.getWriter();
+      writer = response.getWriter();
+      writer.print(content);
+      writer.flush();
     } catch (IOException e) {
       e.printStackTrace();
+    } finally {
+      if (writer != null)
+        writer.close();
     }
-    out.print(content);
   }
 
 
