@@ -10,7 +10,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Iterables.getFirst;
 
 /**
- * User: xavierhanin
  * Date: 2/20/13
  * Time: 1:51 PM
  */

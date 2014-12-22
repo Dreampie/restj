@@ -9,7 +9,6 @@ import java.io.PrintWriter;
 import java.nio.charset.Charset;
 
 /**
- * User: xavierhanin
  * Date: 2/6/13
  * Time: 9:46 PM
  */

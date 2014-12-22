@@ -14,7 +14,6 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * User: xavierhanin
  * Date: 1/22/13
  * Time: 2:52 PM
  */

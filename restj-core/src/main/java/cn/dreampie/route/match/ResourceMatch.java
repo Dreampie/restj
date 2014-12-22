@@ -5,15 +5,12 @@ import cn.dreampie.http.Request;
 import cn.dreampie.kit.ParamNamesScanerKit;
 import cn.dreampie.log.Logger;
 import cn.dreampie.log.LoggerFactory;
-import cn.dreampie.route.Controller;
+import cn.dreampie.route.Resource;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,23 +19,23 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Created by ice on 14-12-19.
  */
-public class RouterMatch {
+public class ResourceMatch {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(RouterMatch.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ResourceMatch.class);
   private final HttpMethod httpMethod;
   private final String pathPattern;
   private final String stdPathPattern;
 
   private final Pattern pattern;
-  private final ImmutableList<String> groupNames;
+  private final ImmutableList<String> pathParamNames;
 
 
-  private final Class<? extends Controller> controllerClass;
+  private final Class<? extends Resource> controllerClass;
   private final Method method;
   private final ImmutableList<String> allParamNames;
   private final ImmutableList<Class<?>> allParamTypes;
 
-  public RouterMatch(Class<? extends Controller> controllerClass, HttpMethod httpMethod, String pathPattern, Method method) {
+  public ResourceMatch(Class<? extends Resource> controllerClass, HttpMethod httpMethod, String pathPattern, Method method) {
     this.controllerClass = controllerClass;
     this.httpMethod = checkNotNull(httpMethod);
     this.pathPattern = checkNotNull(pathPattern);
@@ -53,8 +50,15 @@ public class RouterMatch {
 
     pattern = Pattern.compile(s.patternBuilder.toString());
     stdPathPattern = s.stdPathPatternBuilder.toString();
-    groupNames = s.groupNamesBuilder.build();
+    pathParamNames = s.pathParamNamesBuilder.build();
 
+//    for (String pathParamName:pathParamNames){
+//      if(!allParamNames.contains(pathParamName)){
+//
+//      }
+//    }
+
+    LOGGER.info("Resource path:" + httpMethod.value() + "(" + pathPattern + ")");
   }
 
 
@@ -68,11 +72,11 @@ public class RouterMatch {
     }
 
     ImmutableMap.Builder<String, String> params = ImmutableMap.builder();
-    for (int i = 0; i < m.groupCount() && i < groupNames.size(); i++) {
-      params.put(groupNames.get(i), m.group(i + 1));
+    for (int i = 0; i < m.groupCount() && i < pathParamNames.size(); i++) {
+      params.put(pathParamNames.get(i), m.group(i + 1));
     }
 
-    return Optional.of(new RouteMatch(pathPattern, request.getRestPath(), params.build(),request.getQueryParams()));
+    return Optional.of(new RouteMatch(pathPattern, request.getRestPath(), params.build(), request.getQueryParams()));
   }
 
 
@@ -80,7 +84,7 @@ public class RouterMatch {
     return method + " " + pathPattern;
   }
 
-  public Class<? extends Controller> getControllerClass() {
+  public Class<? extends Resource> getControllerClass() {
     return controllerClass;
   }
 
@@ -101,7 +105,7 @@ public class RouterMatch {
   }
 
   public ImmutableList<String> getPathParamNames() {
-    return groupNames;
+    return pathParamNames;
   }
 
   public ImmutableList<String> getAllParamNames() {
@@ -121,7 +125,7 @@ public class RouterMatch {
     final String pathPattern;
     int offset = 0;
     PathParserCharProcessor processor = regularCharPathParserCharProcessor;
-    ImmutableList.Builder<String> groupNamesBuilder = ImmutableList.builder();
+    ImmutableList.Builder<String> pathParamNamesBuilder = ImmutableList.builder();
     StringBuilder patternBuilder = new StringBuilder();
     StringBuilder stdPathPatternBuilder = new StringBuilder();
 
@@ -187,7 +191,7 @@ public class RouterMatch {
           pathPatternParser.processor = regularCharPathParserCharProcessor;
           pathPatternParser.patternBuilder.append(pathParamRegex);
           pathPatternParser.stdPathPatternBuilder.append("{").append(pathParamName).append("}");
-          pathPatternParser.groupNamesBuilder.add(pathParamName.toString());
+          pathPatternParser.pathParamNamesBuilder.add(pathParamName.toString());
           return;
         }
       } else if (curChar == '{') {
@@ -227,7 +231,7 @@ public class RouterMatch {
       if (!Character.isLetterOrDigit(curChar)) {
         pathPatternParser.patternBuilder.append("([^\\/]+)");
         pathPatternParser.stdPathPatternBuilder.append("{").append(pathParamName).append("}");
-        pathPatternParser.groupNamesBuilder.add(pathParamName.toString());
+        pathPatternParser.pathParamNamesBuilder.add(pathParamName.toString());
         pathPatternParser.processor = regularCharPathParserCharProcessor;
         pathPatternParser.processor.handle(curChar, pathPatternParser);
       } else {
@@ -239,7 +243,7 @@ public class RouterMatch {
     public void end(PathPatternParser pathPatternParser) {
       pathPatternParser.patternBuilder.append("([^\\/]+)");
       pathPatternParser.stdPathPatternBuilder.append("{").append(pathParamName).append("}");
-      pathPatternParser.groupNamesBuilder.add(pathParamName.toString());
+      pathPatternParser.pathParamNamesBuilder.add(pathParamName.toString());
     }
   }
 

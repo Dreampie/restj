@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.util.Properties;
 
 /**
- * User: xavierhanin
  * Date: 5/5/13
  * Time: 7:40 AM
  */

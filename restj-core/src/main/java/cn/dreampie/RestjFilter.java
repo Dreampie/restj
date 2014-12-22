@@ -1,19 +1,3 @@
-/**
- * Copyright (c) 2011-2015, James Zhan 詹波 (restj@126.com).
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package cn.dreampie;
 
 import cn.dreampie.config.Constants;
@@ -32,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * JFinal framework filter
+ * Restj framework filter
  */
 public final class RestjFilter implements Filter {
 
@@ -40,17 +24,17 @@ public final class RestjFilter implements Filter {
   private String encoding;
   private Config config;
   private Constants constants;
-  private static final Restj restj = Restj.me();
+  private static final Restj RESTJ = Restj.instance();
   private static final Logger LOGGER = LoggerFactory.getLogger(RestjFilter.class);
   private int contextPathLength;
 
   public void init(FilterConfig filterConfig) throws ServletException {
     createConfig(filterConfig.getInitParameter("configClass"));
 
-    if (!restj.init(config, filterConfig.getServletContext()))
+    if (!RESTJ.init(config, filterConfig.getServletContext()))
       throw new RuntimeException("Restj init error!");
 
-    handler = restj.getHandler();
+    handler = RESTJ.getHandler();
     constants = ConfigLoader.getConstants();
     encoding = constants.getEncoding();
     config.afterRestjStart();
@@ -84,12 +68,12 @@ public final class RestjFilter implements Filter {
 
   public void destroy() {
     config.beforeRestjStop();
-    restj.stopPlugins();
+    RESTJ.stopPlugins();
   }
 
   private void createConfig(String configClass) {
     if (configClass == null)
-      throw new RuntimeException("Please set configClass parameter of JFinalFilter in web.xml");
+      throw new RuntimeException("Please set configClass parameter of RestjFilter in web.xml");
 
     Object temp = null;
     try {

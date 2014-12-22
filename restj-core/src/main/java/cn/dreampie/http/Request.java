@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * User: xavierhanin
  * Date: 1/22/13
  * Time: 2:49 PM
  */

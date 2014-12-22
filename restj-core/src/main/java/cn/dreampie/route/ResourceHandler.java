@@ -1,19 +1,3 @@
-/**
- * Copyright (c) 2011-2015, James Zhan 詹波 (jfinal@126.com).
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package cn.dreampie.route;
 
 
@@ -26,7 +10,7 @@ import cn.dreampie.http.Response;
 import cn.dreampie.log.Logger;
 import cn.dreampie.log.LoggerFactory;
 import cn.dreampie.route.match.RouteMatch;
-import cn.dreampie.route.match.RouterMatch;
+import cn.dreampie.route.match.ResourceMatch;
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Optional;
 
@@ -36,14 +20,14 @@ import java.io.PrintWriter;
 /**
  * ActionHandler
  */
-public final class RouterHandler extends Handler {
+public final class ResourceHandler extends Handler {
 
   private final boolean devMode;
-  private final RouterBuilder routerBuilder;
-  private static final Logger LOGGER = LoggerFactory.getLogger(RouterHandler.class);
+  private final ResourceBuilder resourceBuilder;
+  private static final Logger LOGGER = LoggerFactory.getLogger(ResourceHandler.class);
 
-  public RouterHandler(RouterBuilder routerBuilder, Constants constants) {
-    this.routerBuilder = routerBuilder;
+  public ResourceHandler(ResourceBuilder resourceBuilder, Constants constants) {
+    this.resourceBuilder = resourceBuilder;
     this.devMode = constants.isDevMode();
   }
 
@@ -55,19 +39,19 @@ public final class RouterHandler extends Handler {
    */
   public final void handle(String target, Request request, Response response, boolean[] isHandled) {
     Optional<? extends RouteMatch> routeMatch = Optional.absent();
-    RouterMatch routerMatch = null;
+    ResourceMatch resourceMatch = null;
     isHandled[0] = true;
 
-    for (RouterMatch matcher : routerBuilder.getRouterMatches()) {
+    for (ResourceMatch matcher : resourceBuilder.getResourceMatches()) {
       routeMatch = matcher.match(request);
       if (routeMatch.isPresent()) {
-        routerMatch = matcher;
+        resourceMatch = matcher;
         break;
       }
     }
 
     if (routeMatch.isPresent()) {
-      String json = JSON.toJSONString(new RouterInvocation(routerMatch, routeMatch.get()).invoke());
+      String json = JSON.toJSONString(new ResourceInvocation(resourceMatch, routeMatch.get()).invoke());
       response.setStatus(HttpStatus.OK);
       response.setContentType(ContentType.JSON.toString());
       write(response, json);
@@ -80,7 +64,7 @@ public final class RouterHandler extends Handler {
 
       sb.append("routes:\n")
           .append("-----------------------------------\n");
-      for (RouterMatch router : routerBuilder.getRouterMatches()) {
+      for (ResourceMatch router : resourceBuilder.getResourceMatches()) {
         sb.append(router).append("\n");
       }
       sb.append("-----------------------------------");

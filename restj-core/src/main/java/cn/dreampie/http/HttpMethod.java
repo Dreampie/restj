@@ -18,10 +18,10 @@ package cn.dreampie.http;
 /**
  * Represents the possible HTTP request methods.
  *
- * @author Eduardo Yáñez
+ * OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT
  */
 public enum HttpMethod {
-  GET("GET"), POST("POST"), PUT("PUT"), DELETE("DELETE"),HEAD("HEAD"),PATCH("PATCH");
+  OPTIONS("OPTIONS"),GET("GET"), POST("POST"), PUT("PUT"), DELETE("DELETE"),HEAD("HEAD"),PATCH("PATCH");
   private final String value;
 
   private HttpMethod(String value) {

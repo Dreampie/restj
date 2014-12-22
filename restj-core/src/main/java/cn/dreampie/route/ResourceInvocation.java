@@ -1,51 +1,34 @@
-/**
- * Copyright (c) 2011-2015, James Zhan 詹波 (jfinal@126.com).
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package cn.dreampie.route;
 
 import cn.dreampie.exception.WebException;
 import cn.dreampie.http.HttpStatus;
 import cn.dreampie.interceptor.Interceptor;
 import cn.dreampie.route.match.RouteMatch;
-import cn.dreampie.route.match.RouterMatch;
+import cn.dreampie.route.match.ResourceMatch;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.ImmutableList;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Objects;
 
 /**
  * ActionInvocation invoke the action
  */
-public class RouterInvocation {
+public class ResourceInvocation {
 
   private Interceptor[] inters;
-  private RouterMatch routerMatch;
+  private ResourceMatch resourceMatch;
   private RouteMatch routeMatch;
   private int index = 0;
 
   private static final Object[] NULL_ARGS = new Object[0];  // Prevent new Object[0] by jvm for paras of action invocation.
 
   // ActionInvocationWrapper need this constructor
-  private RouterInvocation() {
+  private ResourceInvocation() {
 
   }
 
-  RouterInvocation(RouterMatch routerMatch, RouteMatch routeMatch) {
-    this.routerMatch = routerMatch;
+  public ResourceInvocation(ResourceMatch resourceMatch, RouteMatch routeMatch) {
+    this.resourceMatch = resourceMatch;
     this.routeMatch = routeMatch;
     inters = new Interceptor[0];
   }
@@ -57,17 +40,18 @@ public class RouterInvocation {
     if (index < inters.length)
       inters[index++].intercept(this);
     else if (index++ == inters.length) {
-      Controller controller = null;
+      Resource resource = null;
 
       try {
-        controller = routerMatch.getControllerClass().newInstance();
-        Object[] args = new Object[routerMatch.getAllParamNames().size()];
+        resource = resourceMatch.getControllerClass().newInstance();
+
+        Object[] args = new Object[resourceMatch.getAllParamNames().size()];
         int i = 0;
         Class paraType = null;
         ImmutableList<String> valueArr = null;
-        for (String name : routerMatch.getAllParamNames()) {
-          paraType = routerMatch.getAllParamTypes().get(i);
-          if (routerMatch.getPathParamNames().contains(name)) {
+        for (String name : resourceMatch.getAllParamNames()) {
+          paraType = resourceMatch.getAllParamTypes().get(i);
+          if (resourceMatch.getPathParamNames().contains(name)) {
             if (paraType == String.class) {
               args[i] = routeMatch.getPathParam(name);
             } else
@@ -86,8 +70,8 @@ public class RouterInvocation {
           }
           i++;
         }
-        routerMatch.getMethod().setAccessible(true);
-        return routerMatch.getMethod().invoke(controller, args);
+        resourceMatch.getMethod().setAccessible(true);
+        return resourceMatch.getMethod().invoke(resource, args);
       } catch (InvocationTargetException e) {
         Throwable cause = e.getTargetException();
         if (cause instanceof RuntimeException)

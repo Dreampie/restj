@@ -14,7 +14,7 @@ import java.io.IOException;
  * A WebException can be raised to make restj return immediately an HTTP response with a specific HTTP status.
  */
 public class WebException extends RuntimeException {
-  private final static Logger logger = LoggerFactory.getLogger(WebException.class);
+  private final static Logger LOGGER = LoggerFactory.getLogger(WebException.class);
 
   private final HttpStatus status;
 
@@ -75,8 +75,8 @@ public class WebException extends RuntimeException {
    */
   public void writeTo(Request request, Response response) throws IOException {
     // by default log stack trace at debug level only
-    if (logger.isDebugEnabled()) {
-      logger.debug("request raised WebException - " + request, this);
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("request raised WebException - " + request, this);
     }
 
     response.setStatus(getStatus());

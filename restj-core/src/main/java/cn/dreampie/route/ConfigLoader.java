@@ -1,19 +1,3 @@
-/**
- * Copyright (c) 2011-2015, James Zhan 詹波 (jfinal@126.com).
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package cn.dreampie.route;
 
 
@@ -26,11 +10,11 @@ import java.util.List;
 
 public class ConfigLoader {
 
-  private static final Constants constants = new Constants();
-  private static final Controllers CONTROLLERS = new Controllers();
-  private static final Plugins plugins = new Plugins();
-  private static final Interceptors interceptors = new Interceptors();
-  private static final Handlers handlers = new Handlers();
+  private static final Constants CONSTANTS = new Constants();
+  private static final Resources RESOURCES = new Resources();
+  private static final Plugins PLUGINS = new Plugins();
+  private static final Interceptors INTERCEPTORS = new Interceptors();
+  private static final Handlers HANDLERS = new Handlers();
   private static final Logger LOGGER = LoggerFactory.getLogger(ConfigLoader.class);
 
   // prevent new Config();
@@ -41,36 +25,36 @@ public class ConfigLoader {
    * Config order: constant, route, plugin, interceptor, handler
    */
   static void config(Config config) {
-    config.configConstant(constants);
-    config.configController(CONTROLLERS);
-    config.configPlugin(plugins);
+    config.configConstant(CONSTANTS);
+    config.configController(RESOURCES);
+    config.configPlugin(PLUGINS);
     startPlugins();  // very important!!!
-    config.configInterceptor(interceptors);
-    config.configHandler(handlers);
+    config.configInterceptor(INTERCEPTORS);
+    config.configHandler(HANDLERS);
   }
 
   public static Constants getConstants() {
-    return constants;
+    return CONSTANTS;
   }
 
-  public static Controllers getControllers() {
-    return CONTROLLERS;
+  public static Resources getResources() {
+    return RESOURCES;
   }
 
   public static Plugins getPlugins() {
-    return plugins;
+    return PLUGINS;
   }
 
   public static Interceptors getInterceptors() {
-    return interceptors;
+    return INTERCEPTORS;
   }
 
   public static Handlers getHandlers() {
-    return handlers;
+    return HANDLERS;
   }
 
   private static void startPlugins() {
-    List<IPlugin> pluginList = plugins.getPluginList();
+    List<IPlugin> pluginList = PLUGINS.getPluginList();
     if (pluginList == null)
       return;
 

@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * User: xavierhanin
  * Date: 2/6/13
  * Time: 9:40 PM
  */

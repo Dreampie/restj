@@ -12,7 +12,7 @@ public class TestConfig extends Config {
   }
 
 
-  public void configController(Controllers controllers) {
+  public void configController(Resources resources) {
 
   }
 
