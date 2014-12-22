@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 
@@ -97,6 +98,8 @@ public interface Request {
   ImmutableMap<String, ImmutableList<String>> getQueryParams();
 
   Optional<String> getHeader(String headerName);
+
+  Enumeration<String> getHeaders(String headerName);
 
   String getContentType();
 

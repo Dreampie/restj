@@ -1,7 +1,7 @@
 package cn.dreampie;
 
 import cn.dreampie.config.Config;
-import cn.dreampie.config.Constants;
+import cn.dreampie.config.ConstantLoader;
 import cn.dreampie.handler.Handler;
 import cn.dreampie.http.HttpRequest;
 import cn.dreampie.http.HttpResponse;
@@ -23,7 +23,7 @@ public final class RestjFilter implements Filter {
   private Handler handler;
   private String encoding;
   private Config config;
-  private Constants constants;
+  private ConstantLoader constantLoader;
   private static final Restj RESTJ = Restj.instance();
   private static final Logger LOGGER = LoggerFactory.getLogger(RestjFilter.class);
   private int contextPathLength;
@@ -35,17 +35,22 @@ public final class RestjFilter implements Filter {
       throw new RuntimeException("Restj init error!");
 
     handler = RESTJ.getHandler();
-    constants = ConfigLoader.getConstants();
-    encoding = constants.getEncoding();
+    constantLoader = ConfigLoader.getConstantLoader();
+    encoding = constantLoader.getEncoding();
     config.afterRestjStart();
 
     String contextPath = filterConfig.getServletContext().getContextPath();
     contextPathLength = (contextPath == null || "/".equals(contextPath) ? 0 : contextPath.length());
   }
 
-  public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
-    HttpServletRequest request = (HttpServletRequest) req;
-    HttpServletResponse response = (HttpServletResponse) res;
+  public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
+    if (!(servletRequest instanceof HttpServletRequest)
+        || !(servletResponse instanceof HttpServletResponse)) {
+      throw new ServletException("Restj doesn't support non-HTTP request or response.");
+    }
+
+    HttpServletRequest request = (HttpServletRequest) servletRequest;
+    HttpServletResponse response = (HttpServletResponse) servletResponse;
     request.setCharacterEncoding(encoding);
 
     String target = request.getRequestURI();
@@ -54,7 +59,7 @@ public final class RestjFilter implements Filter {
 
     boolean[] isHandled = {false};
     try {
-      handler.handle(target, new HttpRequest(request), new HttpResponse(response, request), isHandled);
+      handler.handle(new HttpRequest(request), new HttpResponse(response, request), isHandled);
     } catch (Exception e) {
       if (LOGGER.isErrorEnabled()) {
         String qs = request.getQueryString();

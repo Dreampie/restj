@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -43,7 +44,6 @@ public class HttpRequest extends AbstractRequest {
 
   @Override
   public String getRestPath() {
-    System.out.println(request.getRequestURI());
     return request.getRequestURI();//.substring((getBaseApiPath()).length());
   }
 
@@ -167,6 +167,10 @@ public class HttpRequest extends AbstractRequest {
   @Override
   public Optional<String> getHeader(String headerName) {
     return Optional.fromNullable(request.getHeader(headerName));
+  }
+
+  public Enumeration<String> getHeaders(String headerName) {
+    return request.getHeaders(headerName);
   }
 
   @Override

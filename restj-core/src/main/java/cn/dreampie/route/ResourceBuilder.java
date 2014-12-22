@@ -2,8 +2,8 @@ package cn.dreampie.route;
 
 import cn.dreampie.annotation.Resource;
 import cn.dreampie.annotation.http.*;
-import cn.dreampie.config.Interceptors;
-import cn.dreampie.config.Resources;
+import cn.dreampie.config.InterceptorLoader;
+import cn.dreampie.config.ResourceLoader;
 import cn.dreampie.http.HttpMethod;
 import cn.dreampie.interceptor.Interceptor;
 import cn.dreampie.interceptor.InterceptorBuilder;
@@ -18,19 +18,19 @@ import java.util.List;
  */
 public final class ResourceBuilder {
 
-  private Resources resources;
-  private Interceptors interceptors;
+  private ResourceLoader resourceLoader;
+  private InterceptorLoader interceptorLoader;
 
   private ImmutableList<ResourceMatch> resourceMatches;
 
-  ResourceBuilder(Resources resources, Interceptors interceptors) {
-    this.resources = resources;
-    this.interceptors = interceptors;
+  ResourceBuilder(ResourceLoader resourceLoader, InterceptorLoader interceptorLoader) {
+    this.resourceLoader = resourceLoader;
+    this.interceptorLoader = interceptorLoader;
   }
 
   void build() {
     InterceptorBuilder interceptorBuilder = new InterceptorBuilder();
-    Interceptor[] defaultInters = interceptors.getInterceptorArray();
+    Interceptor[] defaultInters = interceptorLoader.getInterceptorArray();
     interceptorBuilder.addToInterceptorsMap(defaultInters);
 
     ImmutableList.Builder<ResourceMatch> matchBuilder = ImmutableList.builder();
@@ -44,7 +44,7 @@ public final class ResourceBuilder {
     PATCH patch = null;
     String apiPath = "";
     //addResources
-    for (Class<? extends cn.dreampie.route.Resource> controllerClazz : resources.getControllers()) {
+    for (Class<? extends cn.dreampie.route.Resource> controllerClazz : resourceLoader.getControllers()) {
 
       resource = controllerClazz.getAnnotation(Resource.class);
       if (resource != null) {

@@ -58,7 +58,7 @@ public class ResourceMatch {
 //      }
 //    }
 
-    LOGGER.info("Resource path:" + httpMethod.value() + "(" + pathPattern + ")");
+    LOGGER.info("Resource match:" + httpMethod.value() + "(" + pathPattern + ")");
   }
 
 

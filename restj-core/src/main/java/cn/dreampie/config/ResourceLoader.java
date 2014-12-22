@@ -11,19 +11,19 @@ import java.util.List;
 /**
  * Routes.
  */
-final public class Resources {
+final public class ResourceLoader {
 
   private final List<Class<? extends Resource>> controllers = Lists.newArrayList();
   private List<Class<? extends Resource>> excludeClasses = Lists.newArrayList();
   private List<Class<? extends Resource>> includeClasses = Lists.newArrayList();
   private List<String> includeClassPaths = Lists.newArrayList();
   private List<String> excludeClassPaths = Lists.newArrayList();
-  private static final Logger LOGGER = LoggerFactory.getLogger(Resources.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ResourceLoader.class);
 
-  public Resources add(Resources resources) {
-    if (resources != null) {
-      resources.build();
-      this.controllers.addAll(resources.controllers);
+  public ResourceLoader add(ResourceLoader resourceLoader) {
+    if (resourceLoader != null) {
+      resourceLoader.build();
+      this.controllers.addAll(resourceLoader.controllers);
     }
     return this;
   }
@@ -34,47 +34,47 @@ final public class Resources {
    *
    * @param controllerClass Controller Class
    */
-  public Resources add(Class<? extends Resource> controllerClass) {
+  public ResourceLoader add(Class<? extends Resource> controllerClass) {
     controllers.add(controllerClass);
     return this;
   }
 
-  public Resources addExcludeClasses(Class<? extends Resource>... clazzes) {
+  public ResourceLoader addExcludeClasses(Class<? extends Resource>... clazzes) {
     for (Class<? extends Resource> clazz : clazzes) {
       excludeClasses.add(clazz);
     }
     return this;
   }
 
-  public Resources addExcludeClasses(List<Class<? extends Resource>> clazzes) {
+  public ResourceLoader addExcludeClasses(List<Class<? extends Resource>> clazzes) {
     if (clazzes != null) {
       excludeClasses.addAll(clazzes);
     }
     return this;
   }
 
-  public Resources addExcludePaths(String... paths) {
+  public ResourceLoader addExcludePaths(String... paths) {
     for (String path : paths) {
       excludeClassPaths.add(path);
     }
     return this;
   }
 
-  public Resources addIncludeClasses(Class<? extends Resource>... clazzes) {
+  public ResourceLoader addIncludeClasses(Class<? extends Resource>... clazzes) {
     for (Class<? extends Resource> clazz : clazzes) {
       includeClasses.add(clazz);
     }
     return this;
   }
 
-  public Resources addIncludeClasses(List<Class<? extends Resource>> clazzes) {
+  public ResourceLoader addIncludeClasses(List<Class<? extends Resource>> clazzes) {
     if (clazzes != null) {
       includeClasses.addAll(clazzes);
     }
     return this;
   }
 
-  public Resources addIncludePaths(String... paths) {
+  public ResourceLoader addIncludePaths(String... paths) {
     for (String path : paths) {
       includeClassPaths.add(path);
     }

@@ -1,12 +1,9 @@
 package cn.dreampie.route;
 
 
-import cn.dreampie.config.Constants;
+import cn.dreampie.config.ConstantLoader;
 import cn.dreampie.handler.Handler;
-import cn.dreampie.http.ContentType;
-import cn.dreampie.http.HttpStatus;
-import cn.dreampie.http.Request;
-import cn.dreampie.http.Response;
+import cn.dreampie.http.*;
 import cn.dreampie.log.Logger;
 import cn.dreampie.log.LoggerFactory;
 import cn.dreampie.route.match.ResourceMatch;
@@ -26,9 +23,9 @@ public final class ResourceHandler extends Handler {
   private final ResourceBuilder resourceBuilder;
   private static final Logger LOGGER = LoggerFactory.getLogger(ResourceHandler.class);
 
-  public ResourceHandler(ResourceBuilder resourceBuilder, Constants constants) {
+  public ResourceHandler(ResourceBuilder resourceBuilder, ConstantLoader constantLoader) {
     this.resourceBuilder = resourceBuilder;
-    this.devMode = constants.isDevMode();
+    this.devMode = constantLoader.isDevMode();
   }
 
   /**
@@ -37,7 +34,7 @@ public final class ResourceHandler extends Handler {
    * 2: new ActionInvocation(...).invoke()
    * 3: render(...)
    */
-  public final void handle(String target, Request request, Response response, boolean[] isHandled) {
+  public final void handle(HttpRequest request, HttpResponse response, boolean[] isHandled) {
     Optional<? extends RouteMatch> routeMatch = Optional.absent();
     ResourceMatch resourceMatch = null;
     isHandled[0] = true;

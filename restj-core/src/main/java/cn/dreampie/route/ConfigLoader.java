@@ -10,11 +10,12 @@ import java.util.List;
 
 public class ConfigLoader {
 
-  private static final Constants CONSTANTS = new Constants();
-  private static final Resources RESOURCES = new Resources();
-  private static final Plugins PLUGINS = new Plugins();
-  private static final Interceptors INTERCEPTORS = new Interceptors();
-  private static final Handlers HANDLERS = new Handlers();
+  private static final ConstantLoader CONSTANT_LOADER = new ConstantLoader();
+  private static final ResourceLoader RESOURCE_LOADER = new ResourceLoader();
+  private static final CORSLoader CORS_LOADER = new CORSLoader();
+  private static final PluginLoader PLUGIN_LOADER = new PluginLoader();
+  private static final InterceptorLoader INTERCEPTOR_LOADER = new InterceptorLoader();
+  private static final HandlerLoader HANDLER_LOADER = new HandlerLoader();
   private static final Logger LOGGER = LoggerFactory.getLogger(ConfigLoader.class);
 
   // prevent new Config();
@@ -25,36 +26,41 @@ public class ConfigLoader {
    * Config order: constant, route, plugin, interceptor, handler
    */
   static void config(Config config) {
-    config.configConstant(CONSTANTS);
-    config.configController(RESOURCES);
-    config.configPlugin(PLUGINS);
+    config.configConstant(CONSTANT_LOADER);
+    config.configResource(RESOURCE_LOADER);
+    config.configCORS(CORS_LOADER);
+    config.configPlugin(PLUGIN_LOADER);
     startPlugins();  // very important!!!
-    config.configInterceptor(INTERCEPTORS);
-    config.configHandler(HANDLERS);
+    config.configInterceptor(INTERCEPTOR_LOADER);
+    config.configHandler(HANDLER_LOADER);
   }
 
-  public static Constants getConstants() {
-    return CONSTANTS;
+  public static ConstantLoader getConstantLoader() {
+    return CONSTANT_LOADER;
   }
 
-  public static Resources getResources() {
-    return RESOURCES;
+  public static ResourceLoader getResourceLoader() {
+    return RESOURCE_LOADER;
   }
 
-  public static Plugins getPlugins() {
-    return PLUGINS;
+  public static CORSLoader getCORSLoader() {
+    return CORS_LOADER;
   }
 
-  public static Interceptors getInterceptors() {
-    return INTERCEPTORS;
+  public static PluginLoader getPluginLoader() {
+    return PLUGIN_LOADER;
   }
 
-  public static Handlers getHandlers() {
-    return HANDLERS;
+  public static InterceptorLoader getInterceptorLoader() {
+    return INTERCEPTOR_LOADER;
+  }
+
+  public static HandlerLoader getHandlerLoader() {
+    return HANDLER_LOADER;
   }
 
   private static void startPlugins() {
-    List<IPlugin> pluginList = PLUGINS.getPluginList();
+    List<IPlugin> pluginList = PLUGIN_LOADER.getPluginList();
     if (pluginList == null)
       return;
 

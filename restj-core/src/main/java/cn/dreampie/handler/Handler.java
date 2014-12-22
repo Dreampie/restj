@@ -1,5 +1,7 @@
 package cn.dreampie.handler;
 
+import cn.dreampie.http.HttpRequest;
+import cn.dreampie.http.HttpResponse;
 import cn.dreampie.http.Request;
 import cn.dreampie.http.Response;
 
@@ -16,13 +18,12 @@ public abstract class Handler {
   /**
    * Handle target
    *
-   * @param target    url target of this web http request
    * @param request   HttpServletRequest of this http request
    * @param response  HttpServletRequest of this http request
    * @param isHandled RestjFilter will invoke doFilter() method if isHandled[0] == false,
    *                  it is usually to tell Filter should handle the static resource.
    */
-  public abstract void handle(String target, Request request, Response response, boolean[] isHandled);
+  public abstract void handle(HttpRequest request, HttpResponse response, boolean[] isHandled);
 }
 
 

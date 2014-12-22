@@ -86,6 +86,10 @@ public class HttpResponse extends AbstractResponse<HttpServletResponse> {
     response.setHeader(headerName, header);
   }
 
+  public void doAddHeader(String headerName, String header) {
+    response.addHeader(headerName, header);
+  }
+
   @Override
   @SuppressWarnings("unchecked")
   public <T> T unwrap(Class<T> clazz) {

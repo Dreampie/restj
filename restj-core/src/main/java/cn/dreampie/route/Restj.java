@@ -1,7 +1,8 @@
 package cn.dreampie.route;
 
 import cn.dreampie.config.Config;
-import cn.dreampie.config.Constants;
+import cn.dreampie.config.ConstantLoader;
+import cn.dreampie.cors.CORSHandler;
 import cn.dreampie.handler.Handler;
 import cn.dreampie.handler.HandlerFactory;
 import cn.dreampie.log.Logger;
@@ -18,7 +19,7 @@ public final class Restj {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Restj.class);
 
-  private Constants constants;
+  private ConstantLoader constantLoader;
   private ResourceBuilder resourceBuilder;
   private Handler handler;
   private ServletContext servletContext;
@@ -40,7 +41,7 @@ public final class Restj {
     this.servletContext = servletContext;
 
     ConfigLoader.config(config);  // start plugin and init logger factory in this method
-    constants = ConfigLoader.getConstants();
+    constantLoader = ConfigLoader.getConstantLoader();
 
     initRouter();
     initHandler();
@@ -50,19 +51,21 @@ public final class Restj {
 
 
   private void initHandler() {
-    Handler actionHandler = new ResourceHandler(resourceBuilder, constants);
-    handler = HandlerFactory.getHandler(ConfigLoader.getHandlers().getHandlerList(), actionHandler);
+    Handler actionHandler = new ResourceHandler(resourceBuilder, constantLoader);
+    Handler corsHandler = new CORSHandler(ConfigLoader.getCORSLoader().getCorsConst());
+    ConfigLoader.getHandlerLoader().add(corsHandler);//cors 最好放在第一道拦截器
+    handler = HandlerFactory.getHandler(ConfigLoader.getHandlerLoader().getHandlerList(), actionHandler);
   }
 
 
   private void initRouter() {
-    ConfigLoader.getResources().build();
-    resourceBuilder = new ResourceBuilder(ConfigLoader.getResources(), ConfigLoader.getInterceptors());
+    ConfigLoader.getResourceLoader().build();
+    resourceBuilder = new ResourceBuilder(ConfigLoader.getResourceLoader(), ConfigLoader.getInterceptorLoader());
     resourceBuilder.build();
   }
 
   public void stopPlugins() {
-    List<IPlugin> plugins = ConfigLoader.getPlugins().getPluginList();
+    List<IPlugin> plugins = ConfigLoader.getPluginLoader().getPluginList();
     if (plugins != null) {
       for (int i = plugins.size() - 1; i >= 0; i--) {    // stop plugins
 
@@ -80,8 +83,8 @@ public final class Restj {
     return this.servletContext;
   }
 
-  public Constants getConstants() {
-    return ConfigLoader.getConstants();
+  public ConstantLoader getConstantLoader() {
+    return ConfigLoader.getConstantLoader();
   }
 
 }

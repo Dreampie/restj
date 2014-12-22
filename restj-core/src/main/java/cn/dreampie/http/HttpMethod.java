@@ -21,7 +21,7 @@ package cn.dreampie.http;
  * OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT
  */
 public enum HttpMethod {
-  OPTIONS("OPTIONS"), GET("GET"), POST("POST"), PUT("PUT"), DELETE("DELETE"), HEAD("HEAD"), PATCH("PATCH");
+  OPTIONS("OPTIONS"), GET("GET"), POST("POST"), PUT("PUT"), DELETE("DELETE"), HEAD("HEAD"), PATCH("PATCH"), TRACE("TRACE"), CONNECT("CONNECT");
   private final String value;
 
   private HttpMethod(String value) {

@@ -1,6 +1,7 @@
 package cn.dreampie.http;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import org.joda.time.Duration;
@@ -130,8 +131,15 @@ public abstract class AbstractResponse<R> implements Response {
     return this;
   }
 
+  public final Response addHeader(String headerName, String header) {
+    doAddHeader(headerName, header);
+    headers.put(headerName.toLowerCase(Locale.ENGLISH), Joiner.on(",").join(header, header));
+    return this;
+  }
+
   protected abstract void doSetHeader(String headerName, String header);
 
+  protected abstract void doAddHeader(String headerName, String header);
 
   public Optional<String> getHeader(String headerName) {
     return Optional.fromNullable(headers.get(headerName.toLowerCase(Locale.ENGLISH)));

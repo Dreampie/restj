@@ -7,27 +7,30 @@ import cn.dreampie.config.*;
  */
 public class TestConfig extends Config {
 
-  public void configConstant(Constants constants) {
+  public void configConstant(ConstantLoader constantLoader) {
 
   }
 
 
-  public void configController(Resources resources) {
+  public void configResource(ResourceLoader resourceLoader) {
+
+  }
+
+  public void configCORS(CORSLoader corsLoader) {
+
+  }
+
+  public void configPlugin(PluginLoader pluginLoader) {
 
   }
 
 
-  public void configPlugin(Plugins plugins) {
+  public void configInterceptor(InterceptorLoader interceptorLoader) {
 
   }
 
 
-  public void configInterceptor(Interceptors interceptors) {
-
-  }
-
-
-  public void configHandler(Handlers handlers) {
+  public void configHandler(HandlerLoader handlerLoader) {
 
   }
 }
