@@ -1,74 +1,216 @@
 package cn.dreampie.security;
 
-import cn.dreampie.exception.WebException;
 import com.google.common.base.Optional;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import org.joda.time.Duration;
 
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
 /**
- * Created by ice on 14-12-23.
+ * Session is used to store information which can be used across several HTTP requests from the same client.
+ * <p/>
+ * It is organized as a Map, information is stored by keys.
+ * <p/>
+ * It doesn't use the JEE Session mechanism, but a more lightweight system relying on a signed session cookie
+ * (therefore it cannot be tampered by the client).
+ * <p/>
+ * The session cookie doesn't store the whole valueIdsByKey (which could put a high load on the network and even cause
+ * problems related to cookie size limit), but rather stores a a value id for each session key.
+ * <p/>
+ * A value id MUST identify uniquely a value when used for a given session key, and the session MUST be configured
+ * with a CacheLoader per key, able to load the value corresponding to the value id for a particular key.
+ * <p/>
+ * Therefore on the server the session enables to access arbitrary large objects, it will only put pressure on a
+ * server cache, and on cache loaders if requests are heavily distributed. Indeed the cache is not distributed,
+ * so a in a large clustered environment cache miss will be very likely and cache loaders will often be called.
+ * Hence in such environment you should be careful to use very efficient cache loaders if you rely heavily on
+ * session.
+ * <p/>
+ * An example (using an arbitrary json like notation):
+ * <pre>
+ *     "Session": {
+ *          "definition": {  // this is configured once at application level
+ *              "USER": (valueId) -&gt; { return db.findOne("{_id: #}", valueId).as(User.class); }
+ *          }
+ *          "valueIdsByKeys": {
+ *              "USER": "johndoe@acme.com" // valued from session cookie
+ *          }
+ *     }
+ * </pre>
+ * With such a restx session, when you call a #get(User.class, "USER"), the session will first check its
+ * valueIdsByKeys map to find the corresponding valueId ("johndoe@acme.com"). Then it will check the cache for
+ * this valueId, and in case of cache miss will use the provided cache loader which will load the user from db.
  */
 public class Subject {
 
-  private static Authenticator authenticator;
-  private static int rememberDay;
+  static class Definition {
+    static class Entry<T> {
+      private final String key;
+      private final CacheLoader<String, T> loader;
 
-  public static void setRememberDay(int rememberDay) {
-    Subject.rememberDay = rememberDay;
-  }
-
-  public static void setAuthenticator(Authenticator authenticator) {
-    Subject.authenticator = authenticator;
-  }
-
-  public static Session getSession() {
-    return Session.current();
-  }
-
-  public static Optional<? extends Principal> getPrincipal() {
-    return Session.current().getPrincipal();
-  }
-
-  public static Session login(String name, String password, boolean rememberMe) {
-    if (authenticator != null) {
-      Optional<? extends Principal> principal = authenticator.findByName(name);
-      if (!principal.isPresent())
-        throw new WebException("帐号不存在");
-      else {
-        principal = authenticator.authenticate(name, password);
-        if (principal.isPresent())
-          Session.current().expires(rememberMe
-              ? Duration.standardDays(rememberDay) : Duration.ZERO);
-        else
-          throw new WebException("秘密错误");
+      public Entry(String key, CacheLoader<String, T> loader) {
+        this.key = key;
+        this.loader = loader;
       }
-      return Session.current().authenticateAs(principal.get());
-    } else {
-      throw new RuntimeException("AuthenticateService 没有找到!");
+    }
+
+    private final ImmutableMap<String, LoadingCache<String, ?>> caches;
+
+    // can't use Iterable<Entry<?> as parameter in injectable constructor ATM
+    public Definition(Iterable<Entry> entries) {
+      ImmutableMap.Builder<String, LoadingCache<String, ?>> builder = ImmutableMap.builder();
+      for (Entry<?> entry : entries) {
+        builder.put(entry.key, CacheBuilder.newBuilder().maximumSize(1000).build(entry.loader));
+      }
+      caches = builder.build();
+    }
+
+    public <T> LoadingCache<String, T> getCache(String key) {
+      return (LoadingCache<String, T>) caches.get(key);
     }
   }
 
-  public static Session logout() {
-    return Session.current().clearPrincipal();
+  private static final ThreadLocal<Subject> current = new ThreadLocal<Subject>();
+
+
+  static void setCurrent(Subject ctx) {
+    if (ctx == null) {
+      current.remove();
+    } else {
+      current.set(ctx);
+    }
   }
 
-  public static <T> Optional<T> get(String id) {
-    return (Optional<T>) Session.current().get(id);
+  static Subject current() {
+    return current.get();
   }
 
-  public static Session set(String id, Object value) {
-    return Session.current().set(id, value);
+  private final Definition definition;
+  private final Duration expires;
+  private final ImmutableMap<String, String> valueIdsByKey;
+  private final Optional<? extends Principal> principal;
+
+  Subject(Definition definition, ImmutableMap<String, String> valueIdsByKey,
+          Optional<? extends Principal> principal, Duration expires) {
+    this.definition = definition;
+    this.principal = principal;
+    this.expires = expires;
+    this.valueIdsByKey = valueIdsByKey;
   }
 
-  public static Session cleanUpCaches() {
-    return Session.current().cleanUpCaches();
+  Subject cleanUpCaches() {
+    for (LoadingCache<String, ?> cache : definition.caches.values()) {
+      cache.cleanUp();
+    }
+    return this;
   }
 
-  public static Session expires(Duration duration) {
-    return Session.current().expires(duration);
+
+  <T> Optional<T> get(String id) {
+    return getValue(definition, Principal.SESSION_DEF_KEY, id);
   }
 
-  public static Duration getExpires() {
-    return Session.current().getExpires();
+  static <T> Optional<T> getValue(Definition definition, String key, String valueid) {
+    if (valueid == null) {
+      return Optional.absent();
+    }
+
+    try {
+      return Optional.fromNullable(definition.getCache(key).get(valueid));
+    } catch (CacheLoader.InvalidCacheLoadException e) {
+      // this exception is raised when cache loader returns null, which may happen if the object behind the key
+      // is deleted. Therefore we just return an absent value
+      return Optional.absent();
+    } catch (ExecutionException e) {
+      throw new RuntimeException(
+          "impossible to load object from cache using valueid " + valueid + " for " + key + ": " + e.getMessage(), e);
+    }
   }
 
+  Subject set(String id, Object value) {
+    definition.getCache(Principal.SESSION_DEF_KEY).put(id, value);
+    return Subject.current();
+  }
+
+  Subject set(Definition definition, String key, String valueId, Object value) {
+    definition.getCache(key).put(valueId, value);
+    return Subject.current();
+  }
+
+  Subject define(String key, String valueid) {
+    if (!definition.caches.containsKey(key)) {
+      throw new IllegalArgumentException("undefined context key: " + key + "." +
+          " Keys defined are: " + definition.caches.keySet());
+    }
+    // create new map by using a mutable map, not a builder, in case the the given entry overrides a previous one
+    Map<String, String> newCookieValues = Maps.newHashMap();
+    newCookieValues.putAll(valueIdsByKey);
+    if (valueid == null) {
+      newCookieValues.remove(key);
+    } else {
+      newCookieValues.put(key, valueid);
+    }
+    return mayUpdateCurrent(new Subject(definition, ImmutableMap.copyOf(newCookieValues), principal, expires));
+  }
+
+
+  Subject expires(Duration duration) {
+    return mayUpdateCurrent(new Subject(definition, valueIdsByKey, principal, duration));
+  }
+
+  Duration getExpires() {
+    return expires;
+  }
+
+
+  Subject authenticateAs(Principal principal) {
+    return mayUpdateCurrent(new Subject(definition, valueIdsByKey, Optional.of(principal), expires))
+        .define(Principal.SESSION_DEF_KEY, principal.getUsername());
+  }
+
+  Subject clearPrincipal() {
+    return mayUpdateCurrent(new Subject(definition, valueIdsByKey, Optional.<Principal>absent(), expires))
+        .define(Principal.SESSION_DEF_KEY, null);
+  }
+
+  Optional<? extends Principal> getPrincipal() {
+    return principal;
+  }
+
+  private Subject mayUpdateCurrent(Subject newSubject) {
+    if (this == current()) {
+      current.set(newSubject);
+    }
+    return newSubject;
+  }
+
+  ImmutableMap<String, String> getValueIdsByKey() {
+    return valueIdsByKey;
+  }
+
+  /**
+   * Executes a runnable with this session set as current session.
+   * <p/>
+   * Inside the runnable, the current session can be accessed with Session.current().
+   * <p/>
+   * This method takes care of restoring the current session after the call. So if the current session
+   * is altered inside the runnable it won't have effect on the caller.
+   *
+   * @param runnable the runnable to execute.
+   */
+  public void runIn(Runnable runnable) {
+    Subject current = current();
+
+    setCurrent(this);
+    try {
+      runnable.run();
+    } finally {
+      setCurrent(current);
+    }
+  }
 }
