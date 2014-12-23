@@ -14,6 +14,11 @@ public abstract class Config {
   public abstract void configConstant(ConstantLoader constantLoader);
 
   /**
+   * Config session
+   */
+  public abstract void configSession(SessionLoader sessionLoader);
+
+  /**
    * Config route
    */
   public abstract void configResource(ResourceLoader resourceLoader);

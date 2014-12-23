@@ -11,6 +11,9 @@ public class TestConfig extends Config {
 
   }
 
+  public void configSession(SessionLoader sessionLoader) {
+    sessionLoader.setAuthenticator(new AuthenticatorImpl());
+  }
 
   public void configResource(ResourceLoader resourceLoader) {
 

@@ -11,6 +11,7 @@ import java.util.List;
 public class ConfigLoader {
 
   private static final ConstantLoader CONSTANT_LOADER = new ConstantLoader();
+  private static final SessionLoader SESSION_LOADER = new SessionLoader();
   private static final ResourceLoader RESOURCE_LOADER = new ResourceLoader();
   private static final CORSLoader CORS_LOADER = new CORSLoader();
   private static final PluginLoader PLUGIN_LOADER = new PluginLoader();
@@ -27,6 +28,7 @@ public class ConfigLoader {
    */
   static void config(Config config) {
     config.configConstant(CONSTANT_LOADER);
+    config.configSession(SESSION_LOADER);
     config.configResource(RESOURCE_LOADER);
     config.configCORS(CORS_LOADER);
     config.configPlugin(PLUGIN_LOADER);
@@ -37,6 +39,10 @@ public class ConfigLoader {
 
   public static ConstantLoader getConstantLoader() {
     return CONSTANT_LOADER;
+  }
+
+  public static SessionLoader getSessionLoader() {
+    return SESSION_LOADER;
   }
 
   public static ResourceLoader getResourceLoader() {

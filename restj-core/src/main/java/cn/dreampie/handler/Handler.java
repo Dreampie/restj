@@ -24,6 +24,7 @@ public abstract class Handler {
    *                  it is usually to tell Filter should handle the static resource.
    */
   public abstract void handle(HttpRequest request, HttpResponse response, boolean[] isHandled);
+
 }
 
 

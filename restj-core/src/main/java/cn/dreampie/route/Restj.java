@@ -8,6 +8,7 @@ import cn.dreampie.handler.HandlerFactory;
 import cn.dreampie.log.Logger;
 import cn.dreampie.log.LoggerFactory;
 import cn.dreampie.plugin.IPlugin;
+import cn.dreampie.security.SessionHandler;
 
 import javax.servlet.ServletContext;
 import java.util.List;
@@ -53,6 +54,8 @@ public final class Restj {
   private void initHandler() {
     Handler actionHandler = new ResourceHandler(resourceBuilder, constantLoader);
     Handler corsHandler = new CORSHandler(ConfigLoader.getCORSLoader().getCorsConst());
+    Handler sessionHandler=new SessionHandler(ConfigLoader.getSessionLoader().getLimit(),ConfigLoader.getSessionLoader().getAuthenticator());
+    ConfigLoader.getHandlerLoader().add(sessionHandler);
     ConfigLoader.getHandlerLoader().add(corsHandler);//cors 最好放在第一道拦截器
     handler = HandlerFactory.getHandler(ConfigLoader.getHandlerLoader().getHandlerList(), actionHandler);
   }

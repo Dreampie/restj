@@ -2,6 +2,7 @@ package cn.dreampie;
 
 import cn.dreampie.config.Config;
 import cn.dreampie.config.ConstantLoader;
+import cn.dreampie.exception.WebException;
 import cn.dreampie.handler.Handler;
 import cn.dreampie.http.HttpRequest;
 import cn.dreampie.http.HttpResponse;
@@ -61,10 +62,7 @@ public final class RestjFilter implements Filter {
     try {
       handler.handle(new HttpRequest(request), new HttpResponse(response, request), isHandled);
     } catch (Exception e) {
-      if (LOGGER.isErrorEnabled()) {
-        String qs = request.getQueryString();
-        LOGGER.error(qs == null ? target : target + "?" + qs, e);
-      }
+      throw new WebException(e.getMessage());
     }
 
     if (!isHandled[0])
