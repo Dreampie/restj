@@ -2,13 +2,14 @@ package cn.dreampie.route;
 
 import cn.dreampie.config.Config;
 import cn.dreampie.config.ConstantLoader;
+import cn.dreampie.config.SessionLoader;
 import cn.dreampie.cors.CORSHandler;
 import cn.dreampie.handler.Handler;
 import cn.dreampie.handler.HandlerFactory;
 import cn.dreampie.log.Logger;
 import cn.dreampie.log.LoggerFactory;
 import cn.dreampie.plugin.IPlugin;
-import cn.dreampie.security.SessionHandler;
+import cn.dreampie.security.SessionBuilder;
 
 import javax.servlet.ServletContext;
 import java.util.List;
@@ -52,10 +53,10 @@ public final class Restj {
 
 
   private void initHandler() {
-    Handler actionHandler = new ResourceHandler(resourceBuilder, constantLoader);
+    SessionLoader sessionLoader = ConfigLoader.getSessionLoader();
+    SessionBuilder sessionBuilder = new SessionBuilder(sessionLoader.getLimit(), sessionLoader.getRememberDay(), sessionLoader.getAuthenticator(), sessionLoader.getPasswordService());
+    Handler actionHandler = new ResourceHandler(resourceBuilder, constantLoader, sessionBuilder);
     Handler corsHandler = new CORSHandler(ConfigLoader.getCORSLoader().getCorsConst());
-    Handler sessionHandler=new SessionHandler(ConfigLoader.getSessionLoader().getLimit(),ConfigLoader.getSessionLoader().getAuthenticator());
-    ConfigLoader.getHandlerLoader().add(sessionHandler);
     ConfigLoader.getHandlerLoader().add(corsHandler);//cors 最好放在第一道拦截器
     handler = HandlerFactory.getHandler(ConfigLoader.getHandlerLoader().getHandlerList(), actionHandler);
   }

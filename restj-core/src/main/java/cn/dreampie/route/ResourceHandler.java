@@ -8,6 +8,9 @@ import cn.dreampie.log.Logger;
 import cn.dreampie.log.LoggerFactory;
 import cn.dreampie.route.match.ResourceMatch;
 import cn.dreampie.route.match.RouteMatch;
+import cn.dreampie.security.PermissionChecker;
+import cn.dreampie.security.Session;
+import cn.dreampie.security.SessionBuilder;
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Optional;
 
@@ -21,10 +24,12 @@ public final class ResourceHandler extends Handler {
 
   private final boolean devMode;
   private final ResourceBuilder resourceBuilder;
+  private final SessionBuilder sessionBuilder;
   private static final Logger LOGGER = LoggerFactory.getLogger(ResourceHandler.class);
 
-  public ResourceHandler(ResourceBuilder resourceBuilder, ConstantLoader constantLoader) {
+  public ResourceHandler(ResourceBuilder resourceBuilder, ConstantLoader constantLoader, SessionBuilder sessionBuilder) {
     this.resourceBuilder = resourceBuilder;
+    this.sessionBuilder = sessionBuilder;
     this.devMode = constantLoader.isDevMode();
   }
 
@@ -35,6 +40,9 @@ public final class ResourceHandler extends Handler {
    * 3: render(...)
    */
   public final void handle(HttpRequest request, HttpResponse response, boolean[] isHandled) {
+    Session session = sessionBuilder.build(request);
+
+
     Optional<? extends RouteMatch> routeMatch = Optional.absent();
     ResourceMatch resourceMatch = null;
     isHandled[0] = true;
@@ -51,7 +59,7 @@ public final class ResourceHandler extends Handler {
       String json = JSON.toJSONString(new ResourceInvocation(resourceMatch, routeMatch.get()).invoke());
       response.setStatus(HttpStatus.OK);
       response.setContentType(ContentType.JSON.toString());
-      write(response, json);
+      outWrite(session, response, request, json);
     } else {
       // no route matched
       String path = request.getRestPath();
@@ -67,12 +75,12 @@ public final class ResourceHandler extends Handler {
       sb.append("-----------------------------------");
       response.setStatus(HttpStatus.NOT_FOUND);
       response.setContentType(ContentType.TEXT.toString());
-      write(response, sb.toString());
+      outWrite(session, response, request, sb.toString());
     }
   }
 
-  private void write(Response response, String content) {
-
+  private void outWrite(Session session, HttpResponse response, HttpRequest request, String content) {
+    sessionBuilder.outBuild(session, response);
     PrintWriter writer = null;
     try {
       writer = response.getWriter();
@@ -83,6 +91,14 @@ public final class ResourceHandler extends Handler {
     } finally {
       if (writer != null)
         writer.close();
+      try {
+        request.closeContentStream();
+      } catch (Exception ex) {
+      }
+      try {
+        response.close();
+      } catch (Exception ex) {
+      }
     }
   }
 

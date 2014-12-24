@@ -1,6 +1,5 @@
 package cn.dreampie.security;
 
-import cn.dreampie.handler.Handler;
 import cn.dreampie.http.HttpRequest;
 import cn.dreampie.http.HttpResponse;
 import cn.dreampie.log.Logger;
@@ -10,6 +9,7 @@ import com.google.common.base.Optional;
 import com.google.common.cache.CacheLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -18,24 +18,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by ice on 14-12-23.
+ * Created by ice on 14-12-24.
  */
-public class SessionHandler extends Handler {
+public class SessionBuilder {
 
   public static final String COOKIE_SIGNER_NAME = "CookieSigner";
 
   private static final String EXPIRES = "_expires";
 
-  private final static Logger logger = LoggerFactory.getLogger(SessionHandler.class);
+  private final static Logger logger = LoggerFactory.getLogger(SessionBuilder.class);
 
   private final Sessions sessions;
-  private final Subject.Definition sessionDefinition;
+  private final Session.Definition sessionDefinition;
   private final Signer signer;
   private final SessionCookieDescriptor sessionCookieDescriptor;
-  private final Subject emptySubject;
+  private final Session emptySession;
 
-  public Subject.Definition.Entry principalSessionEntry(final Authenticator authenticator) {
-    return new Subject.Definition.Entry<Principal>(Principal.SESSION_DEF_KEY,
+  public Session.Definition.Entry principalSessionEntry(final Authenticator authenticator) {
+    return new Session.Definition.Entry<Principal>(Principal.SESSION_DEF_KEY,
         new CacheLoader<String, Principal>() {
           public Principal load(String key) throws Exception {
             return authenticator.findByName(key).orNull();
@@ -43,8 +43,8 @@ public class SessionHandler extends Handler {
         });
   }
 
-  public Subject.Definition.Entry sessionKeySessionEntry() {
-    return new Subject.Definition.Entry<String>(Session.SESSION_DEF_KEY,
+  public Session.Definition.Entry sessionKeySessionEntry() {
+    return new Session.Definition.Entry<String>(Session.SESSION_DEF_KEY,
         new CacheLoader<String, String>() {
           public String load(String key) throws Exception {
             return key;
@@ -52,68 +52,68 @@ public class SessionHandler extends Handler {
         });
   }
 
-  public SessionHandler(int limit, final Authenticator authenticator) {
-    SubjectKit.setAuthenticator(authenticator);
+  public SessionBuilder(int limit, int rememberDay, final Authenticator authenticator, PasswordService passwordService) {
+    SubjectKit.init(rememberDay, authenticator, passwordService == null ? new DefaultPasswordService() : passwordService);
     this.sessions = new Sessions(limit);
-    this.sessionDefinition = new Subject.Definition(ImmutableList.of(principalSessionEntry(authenticator), sessionKeySessionEntry()));
+    this.sessionDefinition = new Session.Definition(ImmutableList.of(principalSessionEntry(authenticator), sessionKeySessionEntry()));
     this.signer = new CookieSigner(Optional.<SignatureKey>absent());
     this.sessionCookieDescriptor = new SessionCookieDescriptor();
-    this.emptySubject = new Subject(sessionDefinition, ImmutableMap.<String, String>of(),
+    this.emptySession = new Session(sessionDefinition, ImmutableMap.<String, String>of(),
         Optional.<Principal>absent(), Duration.ZERO);
   }
 
-  public void handle(HttpRequest request, HttpResponse response, boolean[] isHandled) {
+  public Session build(HttpRequest request) {
+    Session session = buildSession(request);
+    Session.setCurrent(session);
 
-    Subject subject = buildSession(request);
-    Subject.setCurrent(subject);
-
-    ImmutableMap<String, String> metadata = prepareSessionStatsMetadata(request, subject);
-    if (subject.getPrincipal().isPresent()) {
-      String name = subject.getPrincipal().get().getUsername();
+    ImmutableMap<String, String> metadata = prepareSessionStatsMetadata(request, session);
+    if (session.getPrincipal().isPresent()) {
+      String name = session.getPrincipal().get().getUsername();
       sessions.touch(name, metadata);
     } else {
       sessions.touch("anonymous@" + request.getClientAddress(), metadata);
     }
+    return session;
+  }
 
-    //让下一个拦截器返回
-    nextHandler.handle(request, response, isHandled);
+  public void outBuild(Session session, HttpResponse response) {
 
-    Subject newSubject = Subject.current();
-    if (newSubject != subject) {
-      updateSessionInClient(response, newSubject);
+    Session newSession = Session.current();
+    if (newSession != session) {
+      updateSessionInClient(response, newSession);
     }
   }
 
-  protected ImmutableMap<String, String> prepareSessionStatsMetadata(HttpRequest req, Subject subject) {
+  protected ImmutableMap<String, String> prepareSessionStatsMetadata(HttpRequest req, Session session) {
     return ImmutableMap.of(
         "clientAddress", req.getClientAddress(),
         "userAgent", req.getHeader("User-Agent").or("Unknown"));
   }
 
-  public Subject buildSession(HttpRequest req) {
+  public Session buildSession(HttpRequest req) {
     String sessionCookieName = sessionCookieDescriptor.getCookieName();
     String cookie = req.getCookieValue(sessionCookieName).or("");
     if (cookie.trim().isEmpty()) {
-      return emptySubject;
+      return emptySession;
     } else {
       String sig = req.getCookieValue(sessionCookieDescriptor.getCookieSignatureName()).or("");
       if (!signer.verify(cookie, sig)) {
         logger.warn("invalid  session signature. session was: {}. Ignoring session cookie.", cookie);
-        return emptySubject;
+        return emptySession;
       }
       Map<String, String> entries = readEntries(cookie);
       DateTime expires = DateTime.parse(entries.remove(EXPIRES));
       if (expires.isBeforeNow()) {
-        return emptySubject;
+        return emptySession;
       }
 
       Duration expiration = req.isPersistentCookie(sessionCookieName) ? new Duration(DateTime.now(), expires) : Duration.ZERO;
       ImmutableMap<String, String> cookieValues = ImmutableMap.copyOf(entries);
       String principalName = cookieValues.get(Principal.SESSION_DEF_KEY);
-      Optional<Principal> principalOptional = Subject.getValue(
+      Optional<Principal> principalOptional = Session.getValue(
           sessionDefinition, Principal.SESSION_DEF_KEY, principalName);
 
-      return new Subject(sessionDefinition, cookieValues, principalOptional, expiration);
+      return new Session(sessionDefinition, cookieValues, principalOptional, expiration);
     }
   }
 
@@ -121,20 +121,20 @@ public class SessionHandler extends Handler {
     return JSON.parseObject(cookie, Map.class);
   }
 
-  private void updateSessionInClient(HttpResponse resp, Subject subject) {
-    ImmutableMap<String, String> cookiesMap = toCookiesMap(subject);
+  private void updateSessionInClient(HttpResponse resp, Session session) {
+    ImmutableMap<String, String> cookiesMap = toCookiesMap(session);
     if (cookiesMap.isEmpty()) {
       resp.clearCookie(sessionCookieDescriptor.getCookieName());
       resp.clearCookie(sessionCookieDescriptor.getCookieSignatureName());
     } else {
       for (Map.Entry<String, String> cookie : cookiesMap.entrySet()) {
-        resp.addCookie(cookie.getKey(), cookie.getValue(), subject.getExpires());
+        resp.addCookie(cookie.getKey(), cookie.getValue(), session.getExpires());
       }
     }
   }
 
-  public ImmutableMap<String, String> toCookiesMap(Subject subject) {
-    ImmutableMap<String, String> sessionMap = subject.getValueIdsByKey();
+  public ImmutableMap<String, String> toCookiesMap(Session session) {
+    ImmutableMap<String, String> sessionMap = session.valueidsByKeyMap();
     if (sessionMap.isEmpty()) {
       return ImmutableMap.of();
     } else {
@@ -147,6 +147,6 @@ public class SessionHandler extends Handler {
   }
 
   public String toString() {
-    return "SessionCookieFilter";
+    return "SessionInterceptor";
   }
 }

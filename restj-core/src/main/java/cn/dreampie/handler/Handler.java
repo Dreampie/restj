@@ -2,8 +2,6 @@ package cn.dreampie.handler;
 
 import cn.dreampie.http.HttpRequest;
 import cn.dreampie.http.HttpResponse;
-import cn.dreampie.http.Request;
-import cn.dreampie.http.Response;
 
 /**
  * Handler.

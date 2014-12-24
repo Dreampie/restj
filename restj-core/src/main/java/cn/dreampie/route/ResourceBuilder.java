@@ -44,50 +44,54 @@ public final class ResourceBuilder {
     PATCH patch = null;
     String apiPath = "";
     //addResources
-    for (Class<? extends cn.dreampie.route.Resource> controllerClazz : resourceLoader.getControllers()) {
-
-      resource = controllerClazz.getAnnotation(Resource.class);
+    for (Class<? extends cn.dreampie.route.Resource> resourceClazz : resourceLoader.getControllers()) {
+      Interceptor[] resourceInters = interceptorBuilder.buildResourceInterceptors(resourceClazz);
+      resource = resourceClazz.getAnnotation(Resource.class);
       if (resource != null) {
         apiPath = resource.value();
       } else {
         apiPath = "";
       }
 
-      Method[] methods = controllerClazz.getMethods();
+      Method[] methods = resourceClazz.getMethods();
       for (Method method : methods) {
+
+        Interceptor[] methodInters = interceptorBuilder.buildMethodInterceptors(method);
+        Interceptor[] routeInters = interceptorBuilder.buildRouteInterceptors(defaultInters, resourceInters, resourceClazz, methodInters, method);
+
         delete = method.getAnnotation(DELETE.class);
         if (delete != null) {
-          matchBuilder.add(new ResourceMatch(controllerClazz, HttpMethod.DELETE, apiPath + delete.value(), method));
+          matchBuilder.add(new ResourceMatch(resourceClazz, HttpMethod.DELETE, apiPath + delete.value(), method, routeInters));
           continue;
         }
 
         get = method.getAnnotation(GET.class);
         if (get != null) {
-          matchBuilder.add(new ResourceMatch(controllerClazz, HttpMethod.GET, apiPath + get.value(), method));
+          matchBuilder.add(new ResourceMatch(resourceClazz, HttpMethod.GET, apiPath + get.value(), method, routeInters));
           continue;
         }
 
         post = method.getAnnotation(POST.class);
         if (post != null) {
-          matchBuilder.add(new ResourceMatch(controllerClazz, HttpMethod.POST, apiPath + post.value(), method));
+          matchBuilder.add(new ResourceMatch(resourceClazz, HttpMethod.POST, apiPath + post.value(), method, routeInters));
           continue;
         }
 
         put = method.getAnnotation(PUT.class);
         if (put != null) {
-          matchBuilder.add(new ResourceMatch(controllerClazz, HttpMethod.PUT, apiPath + put.value(), method));
+          matchBuilder.add(new ResourceMatch(resourceClazz, HttpMethod.PUT, apiPath + put.value(), method, routeInters));
           continue;
         }
 
         head = method.getAnnotation(HEAD.class);
         if (head != null) {
-          matchBuilder.add(new ResourceMatch(controllerClazz, HttpMethod.HEAD, apiPath + head.value(), method));
+          matchBuilder.add(new ResourceMatch(resourceClazz, HttpMethod.HEAD, apiPath + head.value(), method, routeInters));
           continue;
         }
 
         patch = method.getAnnotation(PATCH.class);
         if (patch != null) {
-          matchBuilder.add(new ResourceMatch(controllerClazz, HttpMethod.PATCH, apiPath + patch.value(), method));
+          matchBuilder.add(new ResourceMatch(resourceClazz, HttpMethod.PATCH, apiPath + patch.value(), method, routeInters));
           continue;
         }
       }

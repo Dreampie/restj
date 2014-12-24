@@ -52,7 +52,7 @@ public abstract class AbstractRequest implements Request {
 
   public String getBaseNetworkPath() {
     checkProxyRequest();
-    return "//" + getHost() + getBaseApiPath();
+    return "//" + getHost() + getBasePath();
   }
 
   protected String getHost() {
@@ -121,7 +121,7 @@ public abstract class AbstractRequest implements Request {
    *
    * @return the path on which restj is mounted.
    */
-  protected abstract String getBaseApiPath();
+  protected abstract String getBasePath();
 
   /**
    * The URL scheme used for this request, without taking proxy into account.

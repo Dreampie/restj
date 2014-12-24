@@ -1,7 +1,5 @@
 package cn.dreampie.security;
 
-import com.google.common.base.Charsets;
-
 /**
  * User: xavierhanin
  * Date: 1/30/13

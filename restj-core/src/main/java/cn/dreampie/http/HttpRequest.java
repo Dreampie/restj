@@ -33,8 +33,8 @@ public class HttpRequest extends AbstractRequest {
   }
 
   @Override
-  protected String getBaseApiPath() {
-    return request.getContextPath() + request.getServletPath();
+  protected String getBasePath() {
+    return request.getContextPath();
   }
 
   @Override
@@ -44,7 +44,11 @@ public class HttpRequest extends AbstractRequest {
 
   @Override
   public String getRestPath() {
-    return request.getRequestURI();//.substring((getBaseApiPath()).length());
+    String basepath = getBasePath();
+    if (basepath.length() > 0)
+      return request.getRequestURI().substring(basepath.length());
+    else
+      return request.getRequestURI();
   }
 
   @Override

@@ -1,11 +1,13 @@
 package cn.dreampie.interceptor;
 
 
-import cn.dreampie.route.ResourceInvocation;
+import java.lang.reflect.Method;
 
 /**
  * Interceptor.
  */
 public interface Interceptor {
-  void intercept(ResourceInvocation ai);
+  public void before(Object target, Method method, Object... params);
+
+  public void after(Object target, Object result, Method method, Object... params);
 }

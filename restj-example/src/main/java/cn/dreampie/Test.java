@@ -1,5 +1,9 @@
 package cn.dreampie;
 
+import cn.dreampie.aop.LoggingHandler;
+
+import java.lang.reflect.Proxy;
+
 /**
  * Created by ice on 14-12-22.
  */

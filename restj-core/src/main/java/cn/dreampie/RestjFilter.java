@@ -27,7 +27,6 @@ public final class RestjFilter implements Filter {
   private ConstantLoader constantLoader;
   private static final Restj RESTJ = Restj.instance();
   private static final Logger LOGGER = LoggerFactory.getLogger(RestjFilter.class);
-  private int contextPathLength;
 
   public void init(FilterConfig filterConfig) throws ServletException {
     createConfig(filterConfig.getInitParameter("configClass"));
@@ -40,8 +39,6 @@ public final class RestjFilter implements Filter {
     encoding = constantLoader.getEncoding();
     config.afterRestjStart();
 
-    String contextPath = filterConfig.getServletContext().getContextPath();
-    contextPathLength = (contextPath == null || "/".equals(contextPath) ? 0 : contextPath.length());
   }
 
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
@@ -53,10 +50,6 @@ public final class RestjFilter implements Filter {
     HttpServletRequest request = (HttpServletRequest) servletRequest;
     HttpServletResponse response = (HttpServletResponse) servletResponse;
     request.setCharacterEncoding(encoding);
-
-    String target = request.getRequestURI();
-    if (contextPathLength != 0)
-      target = target.substring(contextPathLength);
 
     boolean[] isHandled = {false};
     try {

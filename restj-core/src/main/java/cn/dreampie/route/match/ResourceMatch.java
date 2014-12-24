@@ -2,6 +2,7 @@ package cn.dreampie.route.match;
 
 import cn.dreampie.http.HttpMethod;
 import cn.dreampie.http.Request;
+import cn.dreampie.interceptor.Interceptor;
 import cn.dreampie.kit.ParamNamesScanerKit;
 import cn.dreampie.log.Logger;
 import cn.dreampie.log.LoggerFactory;
@@ -29,17 +30,19 @@ public class ResourceMatch {
   private final Pattern pattern;
   private final ImmutableList<String> pathParamNames;
 
-
   private final Class<? extends Resource> controllerClass;
   private final Method method;
   private final ImmutableList<String> allParamNames;
   private final ImmutableList<Class<?>> allParamTypes;
 
-  public ResourceMatch(Class<? extends Resource> controllerClass, HttpMethod httpMethod, String pathPattern, Method method) {
+  private final Interceptor[] interceptors;
+
+  public ResourceMatch(Class<? extends Resource> controllerClass, HttpMethod httpMethod, String pathPattern, Method method, Interceptor[] interceptors) {
     this.controllerClass = controllerClass;
     this.httpMethod = checkNotNull(httpMethod);
     this.pathPattern = checkNotNull(pathPattern);
     this.method = method;
+    this.interceptors = interceptors;
 
     allParamNames = ImmutableList.copyOf(ParamNamesScanerKit.getParamNames(method));
     allParamTypes = ImmutableList.copyOf(method.getParameterTypes());
@@ -52,13 +55,7 @@ public class ResourceMatch {
     stdPathPattern = s.stdPathPatternBuilder.toString();
     pathParamNames = s.pathParamNamesBuilder.build();
 
-//    for (String pathParamName:pathParamNames){
-//      if(!allParamNames.contains(pathParamName)){
-//
-//      }
-//    }
-
-    LOGGER.info("Resource match:" + httpMethod.value() + "(" + pathPattern + ")");
+    LOGGER.info("Resource match:" + httpMethod.value() + "(" + pathPattern + "->" + pattern + ")");
   }
 
 
@@ -116,7 +113,11 @@ public class ResourceMatch {
     return allParamTypes;
   }
 
-// here comes the path pattern parsing logic
+  public Interceptor[] getInterceptors() {
+    return interceptors;
+  }
+
+  // here comes the path pattern parsing logic
   // the code is pretty ugly with lot of cross dependencies, I tried to keep it performant, correct, and maintainable
   // not sure those goals are all achieved though
 
